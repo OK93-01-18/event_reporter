@@ -21,7 +21,7 @@ func main() {
         Message:   "Some custom error was happened",
         MaxCount:  25,
         ResetTime: 20 * time.Second,
-        Senders:   []event_reporter.Sender{&TestService{}},
+        Senders:   []event_reporter.Sender{&TestSender{}},
     })
     
     if err != nil {
@@ -54,10 +54,10 @@ func main() {
     wg.Wait()
 }
 
-type TestService struct {
+type TestSender struct {
 }
 
-func (ts *TestService) Send(ctx context.Context, subject string, msg string) error {
+func (ts *TestSender) Send(ctx context.Context, subject string, msg string) error {
     fmt.Println(subject, msg)
     return nil
 }
