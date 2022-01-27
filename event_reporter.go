@@ -85,7 +85,7 @@ func (er *EventReporter) Publish(topic string) error {
 
 	if event.count == event.config.MaxCount {
 		event.count = 0
-		err = event.notifier.Send(context.Background(), event.config.Message, event.config.Message)
+		err = event.notifier.Send(context.Background(), event.config.Subject, event.config.Message)
 		event.ticker.Reset(event.config.ResetTime)
 	}
 
