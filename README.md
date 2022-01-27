@@ -5,12 +5,20 @@ Package EventReporter sending notification with accumulation of error counter an
 
 
 ### Install
-```go
-import "github.com/OK93-01-18/EventReporter"
-```
+
+	go get github.com/OK93-01-18/EventReporter
 
 ### Example
 ```go
+
+import (
+    "context"
+    "fmt"
+    "github.com/ok93-01-18/event_reporter"
+    "math/rand"
+    "sync"
+    "time"
+)
 
 const CustomError = "custom-error"
 
