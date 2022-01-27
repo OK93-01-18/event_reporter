@@ -12,7 +12,7 @@ type Config struct {
 	Message   string
 	MaxCount  int
 	ResetTime time.Duration
-	Sender
+	Senders   []Sender
 }
 
 type Event struct {
@@ -39,7 +39,7 @@ func (er *EventReporter) Add(topic string, conf *Config) error {
 	ticker := time.NewTicker(conf.ResetTime)
 
 	notifier := NewNotify()
-	notifier.UseServices(conf.Sender)
+	notifier.UseServices(conf.Senders...)
 	event := Event{
 		config:   conf,
 		ticker:   ticker,
