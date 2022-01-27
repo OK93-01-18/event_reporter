@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-type EventConfig struct {
+type ReportConfig struct {
 	Subject   string
 	Message   string
 	MaxCount  int
@@ -16,7 +16,7 @@ type EventConfig struct {
 }
 
 type Event struct {
-	config   *EventConfig
+	config   *ReportConfig
 	ticker   *time.Ticker
 	notifier Notifier
 	count    int
@@ -27,7 +27,7 @@ type EventReporter struct {
 	sync.RWMutex
 }
 
-func (er *EventReporter) Add(topic string, conf *EventConfig) error {
+func (er *EventReporter) Add(topic string, conf *ReportConfig) error {
 	er.RLock()
 	_, ok := er.events[topic]
 	er.RUnlock()
