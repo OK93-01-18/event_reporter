@@ -4,7 +4,7 @@ EventReporter
 Package EventReporter sending notification with accumulation of error counter and distribution interval
 
 
-###Install
+### Install
 ```go
 import "github.com/OK93-01-18/EventReporter"
 ```
