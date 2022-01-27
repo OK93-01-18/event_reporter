@@ -14,7 +14,7 @@ Package EventReporter sending notification with accumulation of error counter an
 import (
     "context"
     "fmt"
-    "github.com/ok93-01-18/event_reporter"
+    "github.com/ok93-01-18/EventReporter"
     "math/rand"
     "sync"
     "time"
