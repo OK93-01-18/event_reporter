@@ -1,12 +1,12 @@
-EventReporter
+event_reporter
 ======
 
-Package EventReporter sending notification with accumulation of error counter and distribution interval
+Package event_reporter sending notification with accumulation of error counter and distribution interval
 
 
 ### Install
 
-	go get github.com/OK93-01-18/EventReporter
+	go get github.com/OK93-01-18/event_reporter
 
 ### Example
 ```go
@@ -14,7 +14,7 @@ Package EventReporter sending notification with accumulation of error counter an
 import (
     "context"
     "fmt"
-    "github.com/ok93-01-18/EventReporter"
+    "github.com/ok93-01-18/event_reporter"
     "math/rand"
     "sync"
     "time"
@@ -23,13 +23,13 @@ import (
 const CustomError = "custom-error"
 
 func main() {
-    reporter := EventReporter.New()
-    err := reporter.Add(CustomError, &EventReporter.ReportConfig{
+    reporter := event_reporter.New()
+    err := reporter.Add(CustomError, &event_reporter.ReportConfig{
         Subject:   "Сustom error",
         Message:   "Some custom error was happened",
         MaxCount:  25,
         ResetTime: 20 * time.Second,
-        Senders:   []EventReporter.Sender{&TestSender{}},
+        Senders:   []event_reporter.Sender{&TestSender{}},
     })
     
     if err != nil {
