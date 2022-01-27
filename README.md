@@ -23,13 +23,13 @@ import (
 const CustomError = "custom-error"
 
 func main() {
-    reporter := event_reporter.New()
-    err := reporter.Add(CustomError, &event_reporter.EventConfig{
+    reporter := EventReporter.New()
+    err := reporter.Add(CustomError, &EventReporter.EventConfig{
         Subject:   "Сustom error",
         Message:   "Some custom error was happened",
         MaxCount:  25,
         ResetTime: 20 * time.Second,
-        Senders:   []event_reporter.Sender{&TestSender{}},
+        Senders:   []EventReporter.Sender{&TestSender{}},
     })
     
     if err != nil {
