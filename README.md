@@ -24,7 +24,7 @@ const CustomError = "custom-error"
 
 func main() {
     reporter := event_reporter.New()
-    err := reporter.Add(CustomError, &event_reporter.Config{
+    err := reporter.Add(CustomError, &event_reporter.EventConfig{
         Subject:   "Сustom error",
         Message:   "Some custom error was happened",
         MaxCount:  25,
