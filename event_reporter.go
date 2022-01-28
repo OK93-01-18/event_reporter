@@ -7,6 +7,7 @@ import (
 	"time"
 )
 
+// ReportConfig is config of report event
 type ReportConfig struct {
 	Subject   string
 	MaxCount  int
@@ -14,18 +15,20 @@ type ReportConfig struct {
 	Senders   []Sender
 }
 
-type Event struct {
+type event struct {
 	config   *ReportConfig
 	ticker   *time.Ticker
 	notifier Notifier
 	count    int
 }
 
+// EventReporter is central struct for register events for report
 type EventReporter struct {
-	events map[string]Event
+	events map[string]event
 	sync.RWMutex
 }
 
+// Add is method for adding type of event
 func (er *EventReporter) Add(topic string, conf *ReportConfig) error {
 	er.RLock()
 	_, ok := er.events[topic]
@@ -38,14 +41,14 @@ func (er *EventReporter) Add(topic string, conf *ReportConfig) error {
 	ticker := time.NewTicker(conf.ResetTime)
 
 	notifier := NewNotify()
-	notifier.UseServices(conf.Senders...)
-	event := Event{
+	notifier.UseSenders(conf.Senders...)
+	newEvent := event{
 		config:   conf,
 		ticker:   ticker,
 		notifier: notifier,
 	}
 	er.Lock()
-	er.events[topic] = event
+	er.events[topic] = newEvent
 	er.Unlock()
 
 	go func() {
@@ -53,13 +56,13 @@ func (er *EventReporter) Add(topic string, conf *ReportConfig) error {
 			select {
 			case <-ticker.C:
 				er.RLock()
-				event, _ := er.events[topic]
+				findEvent, _ := er.events[topic]
 				er.RUnlock()
 
-				event.count = 0
+				findEvent.count = 0
 
 				er.Lock()
-				er.events[topic] = event
+				er.events[topic] = findEvent
 				er.Unlock()
 			}
 		}
@@ -68,30 +71,31 @@ func (er *EventReporter) Add(topic string, conf *ReportConfig) error {
 	return nil
 }
 
-func (er *EventReporter) Publish(topic string, inputErr error) error {
+// Publish is method for execute event
+func (er *EventReporter) Publish(topic string, msg string) error {
 
 	er.Lock()
 	defer er.Unlock()
 
 	var err error
 
-	event, ok := er.events[topic]
+	findEvent, ok := er.events[topic]
 	if !ok {
 		return err
 	}
 
-	event.count++
+	findEvent.count++
 
-	if event.count == event.config.MaxCount {
-		event.count = 0
-		err = event.notifier.Send(context.Background(), event.config.Subject, inputErr.Error())
-		event.ticker.Reset(event.config.ResetTime)
+	if findEvent.count == findEvent.config.MaxCount {
+		findEvent.count = 0
+		err = findEvent.notifier.Send(context.Background(), findEvent.config.Subject, msg)
+		findEvent.ticker.Reset(findEvent.config.ResetTime)
 	}
 
-	er.events[topic] = event
+	er.events[topic] = findEvent
 	return err
 }
 
 func New() *EventReporter {
-	return &EventReporter{events: make(map[string]Event)}
+	return &EventReporter{events: make(map[string]event)}
 }
