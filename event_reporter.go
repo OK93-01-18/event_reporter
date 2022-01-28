@@ -9,7 +9,6 @@ import (
 
 type ReportConfig struct {
 	Subject   string
-	Message   string
 	MaxCount  int
 	ResetTime time.Duration
 	Senders   []Sender
@@ -69,7 +68,7 @@ func (er *EventReporter) Add(topic string, conf *ReportConfig) error {
 	return nil
 }
 
-func (er *EventReporter) Publish(topic string) error {
+func (er *EventReporter) Publish(topic string, inputErr error) error {
 
 	er.Lock()
 	defer er.Unlock()
@@ -85,7 +84,7 @@ func (er *EventReporter) Publish(topic string) error {
 
 	if event.count == event.config.MaxCount {
 		event.count = 0
-		err = event.notifier.Send(context.Background(), event.config.Subject, event.config.Message)
+		err = event.notifier.Send(context.Background(), event.config.Subject, inputErr.Error())
 		event.ticker.Reset(event.config.ResetTime)
 	}
 

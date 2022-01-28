@@ -26,7 +26,6 @@ func main() {
     reporter := event_reporter.New()
     err := reporter.Add(CustomError, &event_reporter.ReportConfig{
         Subject:   "Сustom error",
-        Message:   "Some custom error was happened",
         MaxCount:  25,
         ResetTime: 20 * time.Second,
         Senders:   []event_reporter.Sender{&TestSender{}},
@@ -45,7 +44,7 @@ func main() {
         for {
             time.Sleep(time.Duration(rand.Intn(2-1)+1) * time.Second)
             fmt.Println("error happened")
-            reporter.Publish(CustomError)
+            reporter.Publish(CustomError, fmt.Errorf("error happened"))
         }
     }()
     
@@ -55,7 +54,7 @@ func main() {
         for {
             time.Sleep(time.Duration(rand.Intn(2-1)+1) * time.Second)
             fmt.Println("error happened")
-            reporter.Publish(CustomError)
+            reporter.Publish(CustomError, fmt.Errorf("error happened"))
         }
     }()
     
