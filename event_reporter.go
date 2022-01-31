@@ -55,14 +55,10 @@ func (er *EventReporter) Add(topic string, conf *ReportConfig) error {
 		for {
 			select {
 			case <-ticker.C:
-				er.RLock()
-				findEvent, _ := er.events[topic]
-				er.RUnlock()
-
-				findEvent.count = 0
-
 				er.Lock()
-				er.events[topic] = findEvent
+				foundEvent, _ := er.events[topic]
+				foundEvent.count = 0
+				er.events[topic] = foundEvent
 				er.Unlock()
 			}
 		}
@@ -79,20 +75,20 @@ func (er *EventReporter) Publish(topic string, msg string) error {
 
 	var err error
 
-	findEvent, ok := er.events[topic]
+	foundEvent, ok := er.events[topic]
 	if !ok {
 		return err
 	}
 
-	findEvent.count++
+	foundEvent.count++
 
-	if findEvent.count == findEvent.config.MaxCount {
-		findEvent.count = 0
-		err = findEvent.notifier.Send(context.Background(), findEvent.config.Subject, msg)
-		findEvent.ticker.Reset(findEvent.config.ResetTime)
+	if foundEvent.count == foundEvent.config.MaxCount {
+		foundEvent.count = 0
+		err = foundEvent.notifier.Send(context.Background(), foundEvent.config.Subject, msg)
+		foundEvent.ticker.Reset(foundEvent.config.ResetTime)
 	}
 
-	er.events[topic] = findEvent
+	er.events[topic] = foundEvent
 	return err
 }
 
