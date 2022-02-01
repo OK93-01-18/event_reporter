@@ -96,23 +96,18 @@ func (er *EventReporter) Add(topic string, conf *ReportConfig) error {
 }
 
 // Publish is method for execute event
-func (er *EventReporter) Publish(topic string, msg string) error {
-
+func (er *EventReporter) Publish(topic string, msg string) {
 	er.Lock()
 	defer er.Unlock()
 
-	var err error
-
 	foundEvent, ok := er.events[topic]
 	if !ok {
-		return err
+		return
 	}
 
 	foundEvent.logBuffer.Value = msg
 	foundEvent.logBuffer = foundEvent.logBuffer.Next()
-
 	er.events[topic] = foundEvent
-	return err
 }
 
 func (er *EventReporter) GetErrorChan() chan EventError {
