@@ -10,13 +10,12 @@ Package event_reporter sending notification with accumulation of error counter a
 
 ### Example
 ```go
-
 import (
-    "context"
-    "fmt"
-    "github.com/ok93-01-18/event_reporter"
-    "math/rand"
-    "time"
+"fmt"
+"github.com/ok93-01-18/event_reporter"
+"github.com/ok93-01-18/event_reporter/senders/mattermost"
+"math/rand"
+"time"
 )
 
 // CustomError event name
@@ -24,57 +23,45 @@ const CustomError = "custom-error"
 
 func main() {
 
-    // create reporter instance
-    reporter := event_reporter.New()
-    err := reporter.Add(CustomError, &event_reporter.ReportConfig{
-        Subject:   "Сustom error",                         // subject of message
-		LogSize:   25,                                     // event log max size
-        ResetTime: 20 * time.Second,                       // send interval time
-        Senders:   []event_reporter.Sender{&TestSender{}}, // senders slice
-    })
+	mmost := mattermost.New("test-user", "https://test.webhook/")
 
-    if err != nil {
-        fmt.Println(err)
-        return
-    }
+	// create reporter instance
+	reporter := event_reporter.New()
+	err := reporter.Add(CustomError, &event_reporter.ReportConfig{
+		Subject:   "Test event sender",            // subject of message
+		LogSize:   25,                             // event log size
+		ResetTime: 20 * time.Second,               // send interval
+		Senders:   []event_reporter.Sender{mmost}, // senders slice
+	})
 
-    // create 2 coroutine with event execute in random time
-    go func() {
-        for {
-            time.Sleep(time.Duration(rand.Intn(2-1)+1) * time.Second)
-            reporter.Publish(CustomError, "["+time.Now().Format("01-02-2006 15:04:05")+"] error happened")
-        }
-    }()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
-    go func() {
-        for {
-            time.Sleep(time.Duration(rand.Intn(2-1)+1) * time.Second)
-            reporter.Publish(CustomError, "["+time.Now().Format("01-02-2006 15:04:05")+"] error happened 2")
-        }
-    }()
+	// create 2 coroutine with event execute in random time
+	go func() {
+		for {
+			time.Sleep(time.Duration(rand.Intn(2-1)+1) * time.Second)
+			reporter.Publish(CustomError, "["+time.Now().Format("01-02-2006 15:04:05")+"] error happened")
+		}
+	}()
 
-    // read reporter error channel
-    go func() {
-        for err := range reporter.GetErrorChan() {
-            fmt.Printf("%s, %s\n", err.Topic, err.Error.Error())
-        }
-    }()
+	go func() {
+		for {
+			time.Sleep(time.Duration(rand.Intn(2-1)+1) * time.Second)
+			reporter.Publish(CustomError, "["+time.Now().Format("01-02-2006 15:04:05")+"] error happened 2")
+		}
+	}()
 
-    time.Sleep(60 * time.Second) // wait 60 sec before close main coroutine
+	// read reporter error channel
+	go func() {
+		for err := range reporter.GetErrorChan() {
+			fmt.Printf("%s, %s\n", err.Topic, err.Error.Error())
+		}
+	}()
 
-}
+	time.Sleep(60 * time.Second) // wait 60 sec before close main coroutine
 
-// TestSender is a simple sender for error reporter
-type TestSender struct {
-}
-
-// Send is method for sending message
-func (ts *TestSender) Send(ctx context.Context, subject string, msg string) error {
-    n := rand.Intn(10-1) + 1
-    if n > 5 { // random success sending
-        fmt.Println(subject, msg)
-        return nil
-    }
-    return fmt.Errorf("error send to console")
 }
 ```
