@@ -16,54 +16,52 @@ import (
     "fmt"
     "github.com/ok93-01-18/event_reporter"
     "math/rand"
-    "sync"
     "time"
 )
 
-// event name
+// CustomError event name
 const CustomError = "custom-error"
 
 func main() {
-	
-	// create reporter instance
+
+    // create reporter instance
     reporter := event_reporter.New()
     err := reporter.Add(CustomError, &event_reporter.ReportConfig{
-        Subject:   "Сustom error", // subject of message
-        MaxCount:  25, // max count event execute before send
-        ResetTime: 20 * time.Second, // reset MaxCount interval
+        Subject:   "Сustom error",                         // subject of message
+		LogSize:   25,                                     // event log max size
+        ResetTime: 20 * time.Second,                       // send interval time
         Senders:   []event_reporter.Sender{&TestSender{}}, // senders slice
     })
-    
+
     if err != nil {
         fmt.Println(err)
         return
     }
-    
-	// create 2 coroutine with event execute in random time 
-	
-    var wg sync.WaitGroup
-    
-    wg.Add(1)
+
+    // create 2 coroutine with event execute in random time
     go func() {
-        defer wg.Done()
         for {
             time.Sleep(time.Duration(rand.Intn(2-1)+1) * time.Second)
-            fmt.Println("error happened")
-            reporter.Publish(CustomError, "error happened")
+            reporter.Publish(CustomError, "["+time.Now().Format("01-02-2006 15:04:05")+"] error happened")
         }
     }()
-    
-    wg.Add(1)
+
     go func() {
-        defer wg.Done()
         for {
             time.Sleep(time.Duration(rand.Intn(2-1)+1) * time.Second)
-            fmt.Println("error happened")
-            reporter.Publish(CustomError, "error happened")
+            reporter.Publish(CustomError, "["+time.Now().Format("01-02-2006 15:04:05")+"] error happened 2")
         }
     }()
-    
-    wg.Wait()
+
+    // read reporter error channel
+    go func() {
+        for err := range reporter.GetErrorChan() {
+            fmt.Printf("%s, %s\n", err.Topic, err.Error.Error())
+        }
+    }()
+
+    time.Sleep(60 * time.Second) // wait 60 sec before close main coroutine
+
 }
 
 // TestSender is a simple sender for error reporter
@@ -72,7 +70,11 @@ type TestSender struct {
 
 // Send is method for sending message
 func (ts *TestSender) Send(ctx context.Context, subject string, msg string) error {
-    fmt.Println(subject, msg)
-    return nil
+    n := rand.Intn(10-1) + 1
+    if n > 5 { // random success sending
+        fmt.Println(subject, msg)
+        return nil
+    }
+    return fmt.Errorf("error send to console")
 }
 ```
