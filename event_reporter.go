@@ -9,7 +9,7 @@ import (
 )
 
 // Mode is type of event behavior
-type Mode uint
+type Mode uint8
 
 const (
 	// AlwaysNotify is sending when logBuffer not empty
