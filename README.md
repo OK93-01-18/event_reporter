@@ -43,14 +43,14 @@ func main() {
     go func() {
         for {
             time.Sleep(time.Duration(rand.Intn(2-1)+1) * time.Second)
-            reporter.Publish(CustomError, "["+time.Now().Format("01-02-2006 15:04:05")+"] error happened")
+            reporter.Publish(CustomError, "error happened")
         }
     }()
     
     go func() {
         for {
             time.Sleep(time.Duration(rand.Intn(2-1)+1) * time.Second)
-            reporter.Publish(CustomError, "["+time.Now().Format("01-02-2006 15:04:05")+"] error happened 2")
+            reporter.Publish(CustomError, "error happened 2")
         }
     }()
     
