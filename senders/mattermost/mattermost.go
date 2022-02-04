@@ -13,6 +13,11 @@ type Mattermost struct {
 	webhookUrl string
 }
 
+type Request struct {
+	Username string `json:"username"`
+	Text     string `json:"text"`
+}
+
 func New(username string, hookUrl string) *Mattermost {
 	return &Mattermost{
 		username:   username,
@@ -22,8 +27,8 @@ func New(username string, hookUrl string) *Mattermost {
 
 func (m *Mattermost) Send(ctx context.Context, subject string, msg string) error {
 
-	bodymsg := "{\"username\" : \"" + m.username + "\", \"text\" : \"**Subject:** " + subject + "\n" +
-		"**Message:**\n ```log" + msg + "```\"}"
+	bodymsg := "{\"username\" : \"" + m.username + "\", \"text\" : \"**" + subject + "**\n" +
+		"\n ```log\n" + msg + "```\"}"
 
 	req, err := http.NewRequest("POST", m.webhookUrl, bytes.NewBuffer([]byte(bodymsg)))
 	if err != nil {

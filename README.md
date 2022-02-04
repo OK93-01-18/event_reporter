@@ -30,7 +30,8 @@ func main() {
         Subject:   "Test event sender",            // subject of message
         LogSize:   25,                             // event log size
         ResetTime: 20 * time.Second,               // send interval
-        Senders:   []event_reporter.Sender{mmost}, // senders slice
+        Senders:   []event_reporter.Sender{mmost}, // senders slice,
+        Mode:      event_reporter.AlwaysNotify,    // sending mode
     })
     
     if err != nil {

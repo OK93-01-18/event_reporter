@@ -8,12 +8,24 @@ import (
 	"time"
 )
 
+// Mode is type of event behavior
+type Mode uint
+
+const (
+	// AlwaysNotify is sending when logBuffer not empty
+	AlwaysNotify Mode = 1
+
+	// BufferFull is sending when logBuffer full
+	BufferFull Mode = 2
+)
+
 // ReportConfig is config of report event
 type ReportConfig struct {
 	Subject   string
 	LogSize   int
 	ResetTime time.Duration
 	Senders   []Sender
+	Mode      Mode
 }
 
 type event struct {
@@ -66,14 +78,17 @@ func (er *EventReporter) Add(topic string, conf *ReportConfig) error {
 				er.Lock()
 				foundEvent, _ := er.events[topic]
 
+				count := 0
 				msg := ""
 				foundEvent.logBuffer.Do(func(p interface{}) {
 					if p != nil {
 						msg += p.(string) + "\n"
+						count++
 					}
 				})
 
-				if msg != "" {
+				if msg != "" && (foundEvent.config.Mode == AlwaysNotify ||
+					(foundEvent.config.Mode == BufferFull && count == foundEvent.config.LogSize)) {
 					go func() {
 						err := foundEvent.notifier.Send(context.Background(), foundEvent.config.Subject, msg)
 						if err != nil {
@@ -105,7 +120,7 @@ func (er *EventReporter) Publish(topic string, msg string) {
 		return
 	}
 
-	foundEvent.logBuffer.Value = msg
+	foundEvent.logBuffer.Value = "[" + time.Now().Format("01-02-2006 15:04:05") + "] " + msg
 	foundEvent.logBuffer = foundEvent.logBuffer.Next()
 	er.events[topic] = foundEvent
 }
