@@ -1,7 +1,7 @@
 event_reporter
 ======
 
-Package event_reporter sending notification with accumulation of error counter and distribution interval
+Package event_reporter sending notification by interval with event count logic
 
 
 ### Install
