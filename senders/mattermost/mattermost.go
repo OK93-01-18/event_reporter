@@ -13,11 +13,6 @@ type Mattermost struct {
 	webhookUrl string
 }
 
-type Request struct {
-	Username string `json:"username"`
-	Text     string `json:"text"`
-}
-
 func New(username string, hookUrl string) *Mattermost {
 	return &Mattermost{
 		username:   username,
